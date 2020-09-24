@@ -2,10 +2,29 @@ import requests
 from django.shortcuts import render, redirect
 from .models import City
 from .forms import CityForm
+from django.http import HttpResponse
+from django.http import JsonResponse
 
 
-# def index(request):
-#     return render(request,'src/index.html')
+def add_city(request,city):
+    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+    cities = City.objects.all()
+    weather_data = []
+    for city in cities:
+        r = requests.get(url.format(city)).json()
+        city_weather = {
+            'city': city.name,
+            'temperature': r["main"]["temp_min"],
+            'description': r["weather"][0]["description"],
+            'wind_flow': r["wind"]["speed"],
+            'icon': r["weather"][0]["icon"],
+        }
+        weather_data.append(city_weather)
+    context = {
+        'weather_data': weather_data,
+    }
+    return  JsonResponse(context)
+
 
 def home(request):
     url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
@@ -53,8 +72,9 @@ def home(request):
         'message_class' : message_class,
     }
     return render(request, 'web.html', context)
-    # return render(request, 'src/index.html', context)
+
 
 def delete_city(request, city_name):
     City.objects.get(name=city_name).delete()
     return redirect('home')
+    # return json.dumps('home')

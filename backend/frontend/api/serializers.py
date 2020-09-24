@@ -3,6 +3,6 @@ from frontend.models import City
 
 
 class FrontEndSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields =['id','name']
+    class Meta :
         model = City
+        fields =['id','name']
